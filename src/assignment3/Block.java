@@ -9,19 +9,19 @@ public class Block {
  private int yCoord;
  private int size; // height/width of the square
  private int level; // the root (outer most block) is at level 0
- private int maxDepth; 
+ private int maxDepth;
  private Color color;
 
  private Block[] children; // {UR, UL, LL, LR}
 
- public static Random gen = new Random(4);
+ public static Random gen = new Random();
 
 
  /*
-  * These two constructors are here for testing purposes. 
+  * These two constructors are here for testing purposes.
   */
  public Block() {}
- 
+
  public Block(int x, int y, int size, int lvl, int  maxD, Color c, Block[] subBlocks) {
   this.xCoord=x;
   this.yCoord=y;
@@ -32,36 +32,11 @@ public class Block {
   this.children = subBlocks;
  }
 
- public static void main(String[] args) {
-/*  Block[] noBlocks = {};
-  Block block1 = new Block(8,0,8,1,2,Color.GREEN,noBlocks);
-  Block block2 = new Block(0,0,8,1,2,Color.RED,noBlocks);
-  Block block3 = new Block(0,8,8,1,2,Color.YELLOW,noBlocks);
-  Block child1 = new Block(12,8,4,2,2,Color.BLUE,noBlocks);
-  Block child2 = new Block(8,8,4,2,2,Color.RED,noBlocks);
-  Block child3 = new Block(8,12,4,2,2,Color.YELLOW,noBlocks);
-  Block child4 = new Block(12,12,4,2,2,Color.BLUE,noBlocks);
-  Block[] block4children = {child1,child2,child3,child4};
-  Block block4 = new Block(8,8,8,2,2,null,block4children);
-  Block[] mBlockChildren = {block1,block2,block3,block4};
-  Block mBlock = new Block(0,0,16,0,2,null,mBlockChildren);
-  mBlock.printBlock();*/
 
-/*
-  Block blockDepth3 = new Block(0,3);
-  blockDepth3.updateSizeAndPosition(16, 0, 0);
-  blockDepth3.reflect(0);
-  blockDepth3.printBlock();
-
-*/
-
-
- }
- 
 
  /*
-  * Creates a random block given its level and a max depth. 
-  * 
+  * Creates a random block given its level and a max depth.
+  *
   * xCoord, yCoord, size, and highlighted should not be initialized
   * (i.e. they will all be initialized by default)
   */
@@ -69,6 +44,9 @@ public class Block {
   /*
    * ADD YOUR CODE HERE
    */
+  if (lvl> maxDepth){
+   throw new IllegalArgumentException("lvl is bigger than maxDepth");
+  }
   //initialize fields
   this.xCoord = 0;
   this.yCoord = 0;
@@ -104,16 +82,24 @@ public class Block {
 
  /*
   * Updates size and position for the block and all of its sub-blocks, while
-  * ensuring consistency between the attributes and the relationship of the 
-  * blocks. 
-  * 
-  *  The size is the height and width of the block. (xCoord, yCoord) are the 
-  *  coordinates of the top left corner of the block. 
+  * ensuring consistency between the attributes and the relationship of the
+  * blocks.
+  *
+  *  The size is the height and width of the block. (xCoord, yCoord) are the
+  *  coordinates of the top left corner of the block.
   */
  public void updateSizeAndPosition (int size, int xCoord, int yCoord) {
   /*
    * ADD YOUR CODE HERE
    */
+
+  if (size<=0){
+   throw new IllegalArgumentException("Invalid size");
+  }
+
+  if (size%2==1 && this.level!=this.maxDepth){
+   throw new IllegalArgumentException("Invalid size");
+  }
 
   if(this.children.length == 0){
    this.size=size;
@@ -129,20 +115,20 @@ public class Block {
    this.children[2].updateSizeAndPosition(size/2,this.xCoord,this.yCoord+size/2);
    this.children[3].updateSizeAndPosition(size/2,this.xCoord+size/2,this.yCoord+size/2);
   }
-  }
+ }
 
 
 
- 
+
  /*
   * Returns a List of blocks to be drawn to get a graphical representation of this block.
-  * 
+  *
   * This includes, for each undivided Block:
   * - one BlockToDraw in the color of the block
   * - another one in the FRAME_COLOR and stroke thickness 3
-  * 
+  *
   * Note that a stroke thickness equal to 0 indicates that the block should be filled with its color.
-  *  
+  *
   * The order in which the blocks to draw appear in the list does NOT matter.
   */
  public ArrayList<BlockToDraw> getBlocksToDraw() {
@@ -170,27 +156,27 @@ public class Block {
   return list;
  }
  /*
-  * This method is provided and you should NOT modify it. 
+  * This method is provided and you should NOT modify it.
   */
  public BlockToDraw getHighlightedFrame() {
   return new BlockToDraw(GameColors.HIGHLIGHT_COLOR, this.xCoord, this.yCoord, this.size, 5);
  }
- 
- 
- 
+
+
+
  /*
   * Return the Block within this Block that includes the given location
-  * and is at the given level. If the level specified is lower than 
-  * the lowest block at the specified location, then return the block 
+  * and is at the given level. If the level specified is lower than
+  * the lowest block at the specified location, then return the block
   * at the location with the closest level value.
-  * 
-  * The location is specified by its (x, y) coordinates. The lvl indicates 
+  *
+  * The location is specified by its (x, y) coordinates. The lvl indicates
   * the level of the desired Block. Note that if a Block includes the location
-  * (x, y), and that Block is subdivided, then one of its sub-Blocks will 
-  * contain the location (x, y) too. This is why we need lvl to identify 
-  * which Block should be returned. 
-  * 
-  * Input validation: 
+  * (x, y), and that Block is subdivided, then one of its sub-Blocks will
+  * contain the location (x, y) too. This is why we need lvl to identify
+  * which Block should be returned.
+  *
+  * Input validation:
   * - this.level <= lvl <= maxDepth (if not throw exception)
   * - if (x,y) is not within this Block, return null.
   */
@@ -198,13 +184,14 @@ public class Block {
   /*
    * ADD YOUR CODE HERE
    */
+  if (lvl>this.maxDepth || lvl<this.level){
+   throw new IllegalArgumentException("Depth inputted is larger than the maxDepth");
+  }
+
   if (x>this.size+this.xCoord || x<0 || y>this.size+this.yCoord || y<0){
    return null;
   }
 
-  if (lvl>this.maxDepth || lvl<this.level){
-   throw new IllegalArgumentException("Depth inputted is larger than the maxDepth");
-  }
   if (this.children.length!=0) {
    if (this.level == lvl){
     return this;
@@ -216,18 +203,18 @@ public class Block {
    }
   }
   return this;
-  }
+ }
 
- 
- 
+
+
 
  /*
-  * Swaps the child Blocks of this Block. 
-  * If input is 1, swap vertically. If 0, swap horizontally. 
-  * If this Block has no children, do nothing. The swap 
+  * Swaps the child Blocks of this Block.
+  * If input is 1, swap vertically. If 0, swap horizontally.
+  * If this Block has no children, do nothing. The swap
   * should be propagate, effectively implementing a reflection
   * over the x-axis or over the y-axis.
-  * 
+  *
   */
  public void reflect(int direction) {
   /*
@@ -287,12 +274,12 @@ public class Block {
  }
 
 
- 
 
- 
+
+
  /*
-  * Rotate this Block and all its descendants. 
-  * If the input is 1, rotate clockwise. If 0, rotate 
+  * Rotate this Block and all its descendants.
+  * If the input is 1, rotate clockwise. If 0, rotate
   * counterclockwise. If this Block has no children, do nothing.
   */
  public void rotate(int direction) {
@@ -346,22 +333,22 @@ public class Block {
    this.children[i].rotate(direction);
   }
  }
- 
+
 
 
  /*
   * Smash this Block.
-  * 
+  *
   * If this Block can be smashed,
-  * randomly generate four new children Blocks for it.  
+  * randomly generate four new children Blocks for it.
   * (If it already had children Blocks, discard them.)
   * Ensure that the invariants of the Blocks remain satisfied.
-  * 
-  * A Block can be smashed iff it is not the top-level Block 
+  *
+  * A Block can be smashed iff it is not the top-level Block
   * and it is not already at the level of the maximum depth.
-  * 
+  *
   * Return True if this Block was smashed and False otherwise.
-  * 
+  *
   */
  public boolean smash() {
   /*
@@ -386,17 +373,17 @@ public class Block {
   }
   return false;
  }
- 
- 
+
+
  /*
   * Return a two-dimensional array representing this Block as rows and columns of unit cells.
-  * 
-  * Return and array arr where, arr[i] represents the unit cells in row i, 
+  *
+  * Return and array arr where, arr[i] represents the unit cells in row i,
   * arr[i][j] is the color of unit cell in row i and column j.
-  * 
+  *
   * arr[0][0] is the color of the unit cell in the upper left corner of this Block.
   */
- public ArrayList<Color> colorCoord() {
+ /*public ArrayList<Color> colorCoord() {
    if (this.children.length == 0) {
     ArrayList alist = new ArrayList();
     ArrayList blist = new ArrayList();
@@ -423,15 +410,46 @@ public class Block {
     //will be [all top right then all top left then all bot left then all bot right
     return list;
    }
+ }*/
+ public void list2D(Color[][] cList, int xCoord, int yCoord,int factor){
+  int fxcoord = xCoord*factor;
+  int fycoord = yCoord*factor;
+  if (this.children.length!=0){
+   if (fxcoord<this.xCoord+this.size/2){
+    if (fycoord<this.yCoord+this.size/2){
+     this.children[1].list2D(cList,xCoord,yCoord,factor);
+    }
+    else{
+     this.children[2].list2D(cList,xCoord,yCoord,factor);
+    }
+   }
+   else{
+    if(fycoord<this.yCoord+this.size/2){
+     this.children[0].list2D(cList,xCoord,yCoord,factor);
+    }
+    else{
+     this.children[3].list2D(cList,xCoord,yCoord,factor);
+    }
+   }
+  }
+  else{
+   cList[yCoord][xCoord]=this.color;
+  }
  }
  public Color[][] flatten() {
   /*
    * ADD YOUR CODE HERE
    */
-  if (this.level==0){
-  //number of size == nb of sublists
-  Color[][] mColorList = new Color[this.size][this.size];
-   ArrayList list = new ArrayList();
+  int boardDimension = (int) Math.pow(2,this.maxDepth);
+  Color[][] mColorList = new Color[boardDimension][boardDimension];
+  for (int i = 0; i < boardDimension; i++) {
+   for (int j = 0; j < boardDimension; j++) {
+    this.list2D(mColorList, j, i,this.size/boardDimension);
+   }
+  }
+  return mColorList;
+ }
+  /* ArrayList list = new ArrayList();
    Color[] topR = new Color[this.children[0].size*this.children[0].size];
    Color[] topL = new Color[this.children[0].size*this.children[0].size];
    Color[] botL = new Color[this.children[0].size*this.children[0].size];
@@ -458,31 +476,29 @@ public class Block {
    }
    for (int i = (this.children[0].size *this.children[0].size)+(this.children[0].size *this.children[0].size)+(this.children[0].size *this.children[0].size); i<(this.children[0].size *this.children[0].size)+(this.children[0].size *this.children[0].size)+(this.children[0].size *this.children[0].size)+(this.children[0].size *this.children[0].size);i++){
     botR[i]=(Color)list.get(i);
-   }
+   }*/
 
-  }
-  return null;
- }
 
- 
- 
- // These two get methods have been provided. Do NOT modify them. 
+
+
+
+ // These two get methods have been provided. Do NOT modify them.
  public int getMaxDepth() {
   return this.maxDepth;
  }
- 
+
  public int getLevel() {
   return this.level;
  }
 
 
  /*
-  * The next 5 methods are needed to get a text representation of a block. 
+  * The next 5 methods are needed to get a text representation of a block.
   * You can use them for debugging. You can modify these methods if you wish.
   */
  public String toString() {
   return String.format("pos=(%d,%d), size=%d, level=%d"
-    , this.xCoord, this.yCoord, this.size, this.level);
+          , this.xCoord, this.yCoord, this.size, this.level);
  }
 
  public void printBlock() {
@@ -498,14 +514,14 @@ public class Block {
   if (this.children.length == 0) {
    // it's a leaf. Print the color!
    String colorInfo = GameColors.colorToString(this.color) + ", ";
-   System.out.println(indent + colorInfo + this);   
+   System.out.println(indent + colorInfo + this);
   } else {
    System.out.println(indent + this);
    for (Block b : this.children)
     b.printBlockIndented(indentation + 1);
   }
  }
- 
+
  private static void coloredPrint(String message, Color color) {
   System.out.print(GameColors.colorToANSIColor(color));
   System.out.print(message);
@@ -527,5 +543,5 @@ public class Block {
    System.out.println();
   }
  }
- 
+
 }
